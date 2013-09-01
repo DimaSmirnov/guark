@@ -24,22 +24,35 @@ static void func_tags_handler (const GstTagList * list,  const gchar * tag,  gpo
     }
   }
 }
-/*
-static void guark_state_change (GstBus *bus, GstMessage *msg, GuarkData *data) {
-  GstState old_state, new_state, pending_state;
-  gst_message_parse_state_changed (msg, &old_state, &new_state, &pending_state);
- // if (GST_MESSAGE_SRC (msg) == GST_OBJECT (data->playbin2)) {
-    data->state = new_state;
-    g_print ("State set to %s\n", gst_element_state_get_name (new_state));
- //   if (old_state == GST_STATE_READY && new_state == GST_STATE_PAUSED) {
-      // For extra responsiveness, we refresh the GUI as soon as we reach the PAUSED state
-      //refresh_ui (data);
-  //  }
- // }
-}
-*/
+gboolean get_song_position (GstElement *pipeline) {
 
-static gboolean bus_call (GstBus     *bus, GstMessage *msg, gpointer    data) {
+	GstFormat fmt = GST_FORMAT_TIME;
+	char time_string1[50];
+	char time_string2[50];
+
+	Guark_data.current_pos = Guark_data.duration = -1;
+	gst_element_query_position (Guark_data.pipeline, &fmt, &Guark_data.current_pos);
+	gst_element_query_duration (Guark_data.pipeline, &fmt, &Guark_data.duration);
+
+	sprintf(time_string1,"%u:%02u:%02u / ", GST_TIME_ARGS (Guark_data.current_pos));
+	sprintf(time_string2,"%u:%02u:%02u", GST_TIME_ARGS (Guark_data.duration));
+	if(!strcmp(time_string2,"99:99:99")) strcpy(time_string2,"---");
+	strcat(time_string1,time_string2);
+	strcpy(Guark_data.timestamp_string,time_string1);
+	//g_print("%s",Guark_data.timestamp_string);
+
+	char tooltip_string[200];
+	if (Guark_data.state==GUARK_STATE_READY) strcpy(tooltip_string,"STOP. ");
+	else if (Guark_data.state==GUARK_STATE_PAUSED) strcpy(tooltip_string,"PAUSE. ");
+	else if (Guark_data.state==GUARK_STATE_PLAYING) strcpy(tooltip_string,"PLAY. ");
+	strcat(tooltip_string, Guark_data.timestamp_string);
+	strcat(tooltip_string, "\nGuark");
+	gtk_status_icon_set_tooltip(tray_icon, tooltip_string); //Update title status
+
+  return TRUE;
+}
+
+static gboolean bus_call (GstBus *bus, GstMessage *msg, gpointer data) {
 
   GMainLoop *loop = data;
   switch (GST_MESSAGE_TYPE (msg)) {
@@ -47,26 +60,19 @@ static gboolean bus_call (GstBus     *bus, GstMessage *msg, gpointer    data) {
       g_print ("End-of-stream\n");
       g_main_loop_quit (loop);
       Guark_data.state = GUARK_TRACK_ENDS;
-      //Здесь сделать Play restart (play stop - play start)того же самого трека
       Playeron_Changetrack();
-      //Playeron_Stop();
-      //Playeron_Start();
       break;
      }
     case GST_MESSAGE_ERROR: {
       gchar *debug = NULL;
       GError *err = NULL;
-
       gst_message_parse_error (msg, &err, &debug);
-
       g_print ("Error: %s\n", err->message);
       g_error_free (err);
-
       if (debug) {
         g_print ("Debug details: %s\n", debug);
         g_free (debug);
       }
-
       g_main_loop_quit (loop);
       break;
     }
@@ -91,6 +97,7 @@ GuarkState Sound_init(int argc, char *argv[])
 {
 	gst_init (&argc, &argv);
 	loop = g_main_loop_new (NULL, FALSE);
+
 	return GUARK_STATE_READY;
 }
 GuarkState Sound_Deinit()
@@ -100,11 +107,15 @@ GuarkState Sound_Deinit()
 }
 GuarkState Sound_Play() {
 
+	//audio = gst_bin_new ("audiobin");
+
 	decoder  = gst_element_factory_make ("mad", "decoder"); // mp3 decoder
 	convert1 = gst_element_factory_make ("audioconvert", "converter_1");
 	convert2 = gst_element_factory_make ("audioconvert", "converter_2");
 	resample = gst_element_factory_make ("audioresample", "resample");
 	sink     = gst_element_factory_make ("autoaudiosink", "sink");
+
+	volume = gst_element_factory_make("volume", "volume");
 
 	if (!sink || !decoder) {
 		g_print ("FATAL: Decoder or output could not be found. Gstreamer error\n");
@@ -115,12 +126,13 @@ GuarkState Sound_Play() {
 	}
 
 	g_object_set (G_OBJECT (filesrc), "location", Guark_data.playsource, NULL);
-	gst_bin_add_many (GST_BIN (Guark_data.pipeline), filesrc, decoder, convert1, convert2, resample, sink, NULL);
+	gst_bin_add_many (GST_BIN (Guark_data.pipeline), filesrc, decoder, convert1, convert2, resample, volume, sink, NULL);
 
-	if (!gst_element_link_many (filesrc, decoder, convert1, convert2, resample, sink, NULL)) {
+	if (!gst_element_link_many (filesrc, decoder, convert1, convert2, resample, volume, sink, NULL)) {
 		g_print ("FATAL: Failed to link one or more elements! Audio settings error\n");
 		return GUARK_STATE_NULL;
 	}
+
 	Guark_data.state = gst_element_set_state (Guark_data.pipeline, GST_STATE_PLAYING);   // Play!
 	if (Guark_data.state == GST_STATE_CHANGE_FAILURE) { // Failed to start play
 		GstMessage *msg;
@@ -135,6 +147,8 @@ GuarkState Sound_Play() {
 		}
     return GUARK_STATE_NULL;
 	}
+
+//
 
 	Guark_data.state = GUARK_STATE_PLAYING;
 	return GUARK_STATE_PLAYING;

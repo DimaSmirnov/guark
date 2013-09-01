@@ -1,17 +1,40 @@
-void ActionTrayIcon_OnClick(GtkStatusIcon *status_icon, gpointer user_data) // Click on tray icon
-{
+void ActionTrayIcon_OnClick(GtkStatusIcon *status_icon, gpointer user_data) { // Click on tray icon
+
 	if (Guark_data.state==3) { // Stay on pause
 		Playeron_Start();
 	}
 	else if (Guark_data.state==4) { // Stay on play
 		gst_element_set_state (Guark_data.pipeline, GST_STATE_PAUSED);
 		Guark_data.state=3;
-		gtk_status_icon_set_tooltip(tray_icon, "Pause.  Guark-simple audio player");
 		printf("Paused\n");
 		}
 }
+
+gboolean ActionTrayIcon_OnScroll (GtkWidget *widget, GdkEventScroll *event, gpointer user_data) { // mouse scroll on tray icon
+
+	double vol;
+	GstElement *volume;
+
+	volume = gst_bin_get_by_name(GST_BIN(Guark_data.pipeline), "volume");
+	g_object_get (G_OBJECT(volume), "volume", &vol, NULL);
+	printf("Volume: %03f\n", vol);
+
+	if (event->direction == GDK_SCROLL_UP || event->direction == GDK_SCROLL_RIGHT) { // Volume UP
+		if (vol<1.4) {
+			vol = vol+0.1;
+			g_object_set (G_OBJECT(volume), "volume", vol, NULL);
+		}
+	}
+	else if (event->direction == GDK_SCROLL_DOWN || event->direction == GDK_SCROLL_LEFT) { // Volume down
+			vol = vol-0.1;
+			if (vol<=0) g_object_set (G_OBJECT(volume), "volume", 0);
+			else g_object_set (G_OBJECT(volume), "volume", vol, NULL);
+	}
+	gst_object_unref(volume);
+}
+
 void Playeron_Quit() {
-	printf("Quit !!!\n");
+	printf("Bye-bye\n");
 	gtk_main_quit ();
 }
 void Playeron_Prevsong() {
@@ -24,20 +47,18 @@ void Playeron_Nextsong() {
 }
 GuarkState Playeron_Start() {
 	gst_element_set_state (Guark_data.pipeline, GST_STATE_PLAYING);
-	gtk_status_icon_set_tooltip(tray_icon, "Play.  Guark-simple audio player");
 	Guark_data.state=GUARK_STATE_PLAYING;
 	printf("Start playing\n");
 	return GUARK_STATE_PLAYING;
 }
 GuarkState Playeron_Stop() {
 	gst_element_set_state (Guark_data.pipeline, GST_STATE_READY);
-	gtk_status_icon_set_tooltip(tray_icon, "Stop.  Guark-simple audio player");
 	Guark_data.state=2;
 	printf("Stop playing\n");
 }
 GuarkState Playeron_Changetrack() {
 	printf("Change track or stream off\n");
-	if (Guark_data.tracktype == GUARK_STREAM) { //restart stream
+	if (Guark_data.tracktype == GUARK_STREAM) { //if stream fail - restart
 		Playeron_Stop();
 		Playeron_Start();
 	}
@@ -58,7 +79,6 @@ GuarkState Createmenu() {
 	image = gtk_image_new_from_pixbuf(buf);
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM (menuitem_3), image);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem_3);
-	gtk_widget_set_sensitive (menuitem_3,FALSE); // gray-out menu item. IT is TEST option temporary
 
 	buf = gdk_pixbuf_new_from_file_at_size("/usr/share/pixmaps/guark/rewind.png", 16,16, NULL);
 	image = gtk_image_new_from_pixbuf(buf);
@@ -92,12 +112,18 @@ GuarkState Createmenu() {
 	gtk_widget_show_all(menu);
 
 
-	menuitem_subitem = gtk_menu_item_new_with_label("Track1"); // Submenu init
-	submenu = gtk_menu_new();
-	gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem_subitem);
+	submenu = gtk_menu_new(); // Submenu init
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM(menuitem_3), submenu);
-	gtk_widget_show_all(submenu);
+	gtk_widget_set_sensitive (menuitem_3,FALSE); // gray-out submenu. it is TEST option temporary
 
+	menuitem_7 = gtk_image_menu_item_new_with_label("Clear playlist"); // Submenu starts here
+	buf = gdk_pixbuf_new_from_file_at_size("/usr/share/pixmaps/guark/guark.png", 16,16, NULL);
+	image = gtk_image_new_from_pixbuf(buf);
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM (menuitem_7), image);
+	gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem_7);
+
+
+	gtk_widget_show_all(submenu);
 	return 0;
 }
 void ActionTrayIcon_OnMenu(GtkWidget *widget, GdkEvent *event) { // Show main menu
@@ -107,6 +133,7 @@ static GtkStatusIcon *CreateTrayIcon() {
         tray_icon = gtk_status_icon_new();
         g_signal_connect(G_OBJECT(tray_icon), "popup-menu", G_CALLBACK(ActionTrayIcon_OnMenu), NULL);
         g_signal_connect(G_OBJECT(tray_icon), "activate",G_CALLBACK(ActionTrayIcon_OnClick), NULL);
+        g_signal_connect(G_OBJECT(tray_icon), "scroll-event",G_CALLBACK(ActionTrayIcon_OnScroll), NULL);
         gtk_status_icon_set_from_file (tray_icon, "/usr/share/pixmaps/guark/guark.png");
         gtk_status_icon_set_tooltip(tray_icon, "Guark. Simple audio player");
         gtk_status_icon_set_visible(tray_icon, TRUE);
