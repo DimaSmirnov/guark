@@ -1,30 +1,47 @@
+	typedef enum {
+		GUARK_STATE_NULL    = 1,
+		GUARK_STATE_READY   = 2,
+		GUARK_STATE_PAUSED  = 3,
+		GUARK_STATE_PLAYING = 4,
+		GUARK_TRACK_ENDS 		= 5
+	} GuarkState;
 
-	int Sound_Play();
-	int Sound_init(int, char**);
-	int Sound_Deinit();
+	typedef enum {
+		GUARK_MP3    = 1,
+		GUARK_STREAM   = 2,
+		GUARK_OGG  = 3
+	} GuarkTrackType;
 
-	GstStateChangeReturn gst_ret;
-  GstElement *pipeline, *filesrc, *decoder, *filter, *sink;
+	GuarkState Sound_Play();
+	GuarkState Sound_init(int, char**);
+	GuarkState Sound_Deinit();
+	GuarkState Createmenu();
+	GuarkState Playeron_Start();
+	GuarkState Playeron_Stop();
+	GuarkState Playeron_Changetrack();
+
+  GstElement *filesrc, *decoder, *filter, *sink;
   GstElement *convert1, *convert2, *resample;
   GMainLoop *loop;
   GstBus *bus;
   guint watch_id;
 
 	GtkWidget *response_widget;
-	GtkWidget *menu;
+	GtkWidget *menu, *menuitem_1, *menuitem_2, *menuitem_3, *menuitem_4, *menuitem_5, *menuitem_6;
 	GtkStatusIcon *tray_icon;
+	GtkWidget *image;
+	GtkWidget *widget;
+	GdkPixbuf *buf;
+
+	typedef struct _Guarkdata {
+		GstElement *pipeline;				// guark pipeline
+		GstStateChangeReturn state;	// Current state of the pipeline
+		char playsource[255];			// Current song;
+		int tracktype;							// Type of track (GuarkTrackType)
+		int duration;								// Duration of the song, in seconds
+		int current_pos;						// Current song position
+	} Guarkdata;
+	Guarkdata Guark_data;
 
 
-	char play_source[200];
 
-	typedef struct _GuarkData {
-		GstElement *playbin2;           /* Our one and only pipeline */
-
-		GtkWidget *slider;              /* Slider widget to keep track of current position */
-		GtkWidget *streams_list;        /* Text widget to display info about the streams */
-		gulong slider_update_signal_id; /* Signal ID for the slider update signal */
-
-		GstState state;                 /* Current state of the pipeline */
-		gint64 duration;                /* Duration of the clip, in nanoseconds */
-	} GuarkData;
-	GuarkData data;
