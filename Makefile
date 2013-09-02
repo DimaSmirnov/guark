@@ -1,4 +1,4 @@
-guark: main.c gst.c gtk.c variables.h
+guark: main.c gst.c gtk.c variables.h playlist.c
 	gcc main.c `pkg-config --cflags --libs gstreamer-0.10` `pkg-config --cflags --libs gtk+-2.0` -o guark -std=c99
 
 install: guark

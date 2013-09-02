@@ -11,25 +11,32 @@ void ActionTrayIcon_OnClick(GtkStatusIcon *status_icon, gpointer user_data) { //
 }
 
 gboolean ActionTrayIcon_OnScroll (GtkWidget *widget, GdkEventScroll *event, gpointer user_data) { // mouse scroll on tray icon
-
 	double vol;
 	GstElement *volume;
 
 	volume = gst_bin_get_by_name(GST_BIN(Guark_data.pipeline), "volume");
 	g_object_get (G_OBJECT(volume), "volume", &vol, NULL);
-	printf("Volume: %03f\n", vol);
 
-	if (event->direction == GDK_SCROLL_UP || event->direction == GDK_SCROLL_RIGHT) { // Volume UP
+	if (event->direction == GDK_SCROLL_UP) { // Volume UP
 		if (vol<1.4) {
 			vol = vol+0.1;
 			g_object_set (G_OBJECT(volume), "volume", vol, NULL);
 		}
+		printf("Volume up to: %f\n", vol);
 	}
-	else if (event->direction == GDK_SCROLL_DOWN || event->direction == GDK_SCROLL_LEFT) { // Volume down
+	else if (event->direction == GDK_SCROLL_DOWN) { // Volume down
 			vol = vol-0.1;
 			if (vol<=0) g_object_set (G_OBJECT(volume), "volume", 0);
 			else g_object_set (G_OBJECT(volume), "volume", vol, NULL);
+			printf("Volume down to: %f\n", vol);
 	}
+	else if (event->direction == GDK_SCROLL_RIGHT) { // Next track in playlist
+		printf("Next track in playlist\n");
+	}
+	else if (event->direction == GDK_SCROLL_LEFT) { // Prev. track in playlist
+		printf("Previously track in playlist\n");
+	}
+
 	gst_object_unref(volume);
 }
 
@@ -129,7 +136,10 @@ GuarkState Createmenu() {
 void ActionTrayIcon_OnMenu(GtkWidget *widget, GdkEvent *event) { // Show main menu
 	gtk_menu_popup (GTK_MENU(menu), 0, NULL, NULL, NULL, 0, gtk_get_current_event_time ());
 }
-static GtkStatusIcon *CreateTrayIcon() {
+static GtkStatusIcon *Guark_Init() {
+
+				Guark_playlist = calloc(1, sizeof(struct _Guarkplaylist));
+
         tray_icon = gtk_status_icon_new();
         g_signal_connect(G_OBJECT(tray_icon), "popup-menu", G_CALLBACK(ActionTrayIcon_OnMenu), NULL);
         g_signal_connect(G_OBJECT(tray_icon), "activate",G_CALLBACK(ActionTrayIcon_OnClick), NULL);

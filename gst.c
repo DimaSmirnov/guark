@@ -51,7 +51,6 @@ gboolean get_song_position (GstElement *pipeline) {
 
   return TRUE;
 }
-
 static gboolean bus_call (GstBus *bus, GstMessage *msg, gpointer data) {
 
   GMainLoop *loop = data;
@@ -92,16 +91,13 @@ static gboolean bus_call (GstBus *bus, GstMessage *msg, gpointer data) {
   }
   return TRUE;
 }
-
-GuarkState Sound_init(int argc, char *argv[])
-{
+GuarkState Sound_init(int argc, char *argv[]) {
 	gst_init (&argc, &argv);
 	loop = g_main_loop_new (NULL, FALSE);
 
 	return GUARK_STATE_READY;
 }
-GuarkState Sound_Deinit()
-{
+GuarkState Sound_Deinit() {
 	g_main_loop_unref (loop);
 	return GUARK_STATE_NULL;
 }
@@ -153,4 +149,35 @@ GuarkState Sound_Play() {
 	Guark_data.state = GUARK_STATE_PLAYING;
 	return GUARK_STATE_PLAYING;
 }
+int proc_find(const char* name) {
+	DIR* dir;
+	struct dirent* ent;
+	char buf[512];
+	long  pid;
+	char state, pname[100] = {0,};
+	int cntr=0;
+	FILE *fp=NULL;
 
+	if (!(dir = opendir("/proc"))) {
+		perror("FATAL: Can't open /proc");
+		return -1;
+	}
+	while((ent = readdir(dir)) != NULL) {
+		long lpid = atol(ent->d_name);
+		if(lpid < 0) continue;
+		snprintf(buf, sizeof(buf), "/proc/%ld/stat", lpid);
+		fp = fopen(buf, "r");
+		if (fp) {
+			if ( (fscanf(fp, "%ld (%[^)]) %c", &pid, pname, &state)) != 3 ){
+				printf("FATAL: fail to count program instancies q-ty \n");
+				fclose(fp);
+				closedir(dir);
+				return -1;
+			}
+			if (!strcmp(pname, name)) cntr++;
+		}
+	}
+	fclose(fp);
+	closedir(dir);
+return cntr;
+}

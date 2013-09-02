@@ -25,6 +25,8 @@
   GMainLoop *loop;
   GstBus *bus;
   guint watch_id;
+	int guark_inst_qty;
+	int guarkplaylist_currentpos;
 
 	GtkWidget *response_widget;
 	GtkWidget *menu, *menuitem_1, *menuitem_2, *menuitem_3, *menuitem_4, *menuitem_5, *menuitem_6, *menuitem_7;
@@ -33,7 +35,7 @@
 	GtkWidget *widget;
 	GdkPixbuf *buf;
 
-	typedef struct _Guarkplaylist {
+	struct _Guarkplaylist {	//Playlist array
 			char track[500];				// Path to track
 			char short_track[500];	//Short track name (without / in path)
 			int tracktype;					// Type of track (GuarkTrackType)
