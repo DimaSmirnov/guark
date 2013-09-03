@@ -91,46 +91,37 @@ static gboolean bus_call (GstBus *bus, GstMessage *msg, gpointer data) {
   }
   return TRUE;
 }
+static void on_pad_added (GstElement *element, GstPad     *pad, gpointer    data) {
+  GstPad *sinkpad;
+  GstElement *decoder = (GstElement *) data;
+
+  sinkpad = gst_element_get_static_pad (decoder, "sink");
+  gst_pad_link (pad, sinkpad);
+  gst_object_unref (sinkpad);
+}
 GuarkState Sound_init(int argc, char *argv[]) {
 	gst_init (&argc, &argv);
 	loop = g_main_loop_new (NULL, FALSE);
-
+	Guark_data.pipeline = gst_pipeline_new ("guark_pipeline");
+	bus = gst_pipeline_get_bus (GST_PIPELINE (Guark_data.pipeline));
+	watch_id = gst_bus_add_watch (bus, bus_call, loop);
+	gst_object_unref (bus);
 	return GUARK_STATE_READY;
 }
 GuarkState Sound_Deinit() {
+
+	gst_element_set_state (Guark_data.pipeline, GST_STATE_NULL);
+  gst_object_unref (Guark_data.pipeline);
+  g_source_remove (watch_id);
 	g_main_loop_unref (loop);
 	return GUARK_STATE_NULL;
 }
 GuarkState Sound_Play() {
+	// Сначала берем трек из плейлиста, затем устанавливаем его декодеры и запускаем его
 
-	//audio = gst_bin_new ("audiobin");
-
-	decoder  = gst_element_factory_make ("mad", "decoder"); // mp3 decoder
-	convert1 = gst_element_factory_make ("audioconvert", "converter_1");
-	convert2 = gst_element_factory_make ("audioconvert", "converter_2");
-	resample = gst_element_factory_make ("audioresample", "resample");
-	sink     = gst_element_factory_make ("autoaudiosink", "sink");
-
-	volume = gst_element_factory_make("volume", "volume");
-
-	if (!sink || !decoder) {
-		g_print ("FATAL: Decoder or output could not be found. Gstreamer error\n");
-		return GUARK_STATE_NULL;
-	} else if (!convert1 || !convert2 || !resample) {
-		g_print ("FATAL: Could not create audioconvert or audioresample element. Gstreamer error\n");
-		return GUARK_STATE_NULL;
-	}
-
-	g_object_set (G_OBJECT (filesrc), "location", Guark_data.playsource, NULL);
-	gst_bin_add_many (GST_BIN (Guark_data.pipeline), filesrc, decoder, convert1, convert2, resample, volume, sink, NULL);
-
-	if (!gst_element_link_many (filesrc, decoder, convert1, convert2, resample, volume, sink, NULL)) {
-		g_print ("FATAL: Failed to link one or more elements! Audio settings error\n");
-		return GUARK_STATE_NULL;
-	}
-
-	Guark_data.state = gst_element_set_state (Guark_data.pipeline, GST_STATE_PLAYING);   // Play!
-	if (Guark_data.state == GST_STATE_CHANGE_FAILURE) { // Failed to start play
+	if (Guarkdecoder_set(Guark_data.playsource)==GUARK_STATE_NULL) return GUARK_STATE_NULL; // Устанавливаем декодеры
+	Guark_data.state = gst_element_set_state (Guark_data.pipeline, GST_STATE_PLAYING);   // Запускаем файл
+	if (Guark_data.state == GST_STATE_CHANGE_FAILURE) {
 		GstMessage *msg;
 		g_print ("Failed to start up pipeline!\n");
 		msg = gst_bus_poll (bus, GST_MESSAGE_ERROR, 0);
@@ -143,10 +134,8 @@ GuarkState Sound_Play() {
 		}
     return GUARK_STATE_NULL;
 	}
-
-//
-
 	Guark_data.state = GUARK_STATE_PLAYING;
+	g_print ("Now playing: %s\n", Guark_data.playsource);
 	return GUARK_STATE_PLAYING;
 }
 int proc_find(const char* name) {

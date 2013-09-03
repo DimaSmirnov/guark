@@ -70,9 +70,17 @@ GuarkState Playeron_Changetrack() {
 		Playeron_Start();
 	}
 }
+GuarkState Playeron_ClearPlaylist() {
+	printf("Clear playlist\n");
+}
+GuarkState Playeron_Trackselect(GtkMenuItem *widget, gpointer user_data) {
+
+	strcpy(Guark_data.playsource,gtk_menu_item_get_label(widget));
+	printf("Select track %s from playlist\n",Guark_data.playsource);
+}
 GuarkState Createmenu() {
 
-	GtkWidget *submenu, *menuitem_subitem;
+
 
 	menu = gtk_menu_new();
 	menuitem_1 = gtk_image_menu_item_new_with_label("Previously");
@@ -115,7 +123,6 @@ GuarkState Createmenu() {
 
 	g_signal_connect(menuitem_6, "activate",(GCallback) Playeron_Quit, widget);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem_6);
-
 	gtk_widget_show_all(menu);
 
 
@@ -128,17 +135,20 @@ GuarkState Createmenu() {
 	image = gtk_image_new_from_pixbuf(buf);
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM (menuitem_7), image);
 	gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem_7);
-
+	g_signal_connect(menuitem_7, "activate",(GCallback) Playeron_ClearPlaylist, widget);
 
 	gtk_widget_show_all(submenu);
+
+	g_timeout_add (1000, (GSourceFunc) get_song_position, Guark_data.pipeline);
 	return 0;
 }
 void ActionTrayIcon_OnMenu(GtkWidget *widget, GdkEvent *event) { // Show main menu
 	gtk_menu_popup (GTK_MENU(menu), 0, NULL, NULL, NULL, 0, gtk_get_current_event_time ());
 }
-static GtkStatusIcon *Guark_Init() {
+static GtkStatusIcon *Guark_Init(int argc, char *argv[]) {
 
 				Guark_playlist = calloc(1, sizeof(struct _Guarkplaylist));
+				gtk_init(&argc, &argv);
 
         tray_icon = gtk_status_icon_new();
         g_signal_connect(G_OBJECT(tray_icon), "popup-menu", G_CALLBACK(ActionTrayIcon_OnMenu), NULL);

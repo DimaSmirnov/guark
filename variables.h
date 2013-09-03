@@ -10,7 +10,7 @@
 		GUARK_MP3    = 1,
 		GUARK_STREAM   = 2,
 		GUARK_OGG  = 3
-	} GuarkTrackType;
+	} GuarkDecoderType;
 
 	GuarkState Sound_Play();
 	GuarkState Sound_init(int, char**);
@@ -19,17 +19,17 @@
 	GuarkState Playeron_Start();
 	GuarkState Playeron_Stop();
 	GuarkState Playeron_Changetrack();
+	GuarkState Guarkdecoder_set(char*);
 
-  GstElement *audio, *filesrc, *decoder, *filter, *sink, *volume;
+  GstElement *audio, *filesrc, *decoder, *demuxer, *filter, *sink, *volume;
   GstElement *convert1, *convert2, *resample;
   GMainLoop *loop;
   GstBus *bus;
   guint watch_id;
-	int guark_inst_qty;
-	int guarkplaylist_currentpos;
 
 	GtkWidget *response_widget;
-	GtkWidget *menu, *menuitem_1, *menuitem_2, *menuitem_3, *menuitem_4, *menuitem_5, *menuitem_6, *menuitem_7;
+	GtkWidget *menu, *menuitem_1, *menuitem_2, *menuitem_3, *menuitem_4, *menuitem_5, *menuitem_6, *menuitem_7, *menuitem_8;
+	GtkWidget *submenu;
 	GtkStatusIcon *tray_icon;
 	GtkWidget *image;
 	GtkWidget *widget;
@@ -38,14 +38,15 @@
 	struct _Guarkplaylist {	//Playlist array
 			char track[500];				// Path to track
 			char short_track[500];	//Short track name (without / in path)
-			int tracktype;					// Type of track (GuarkTrackType)
 	} *Guark_playlist;
 
 	typedef struct _Guarkdata {
 		GstElement *pipeline;				// guark pipeline
 		GstStateChangeReturn state;	// Current state of tracker (GstStateChangeReturn)
-		char playsource[255];				// Current song;
-		int tracktype;							// Type of track (GuarkTrackType)
+		char playsource[255];				// Current song
+		int playlistpos;						// Current position in playlist
+		int inplaylist;	// Кол-во треков в плейлисте
+		int tracktype;							// Type of track (GuarkDecoderType)
 		gint64 duration;						// Duration of the song
 		gint64 current_pos;					// Current song position
 		char timestamp_string[100];
