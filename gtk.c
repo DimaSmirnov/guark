@@ -70,9 +70,6 @@ GuarkState Playeron_Changetrack() {
 		Playeron_Start();
 	}
 }
-GuarkState Playeron_ClearPlaylist() {
-	printf("Clear playlist\n");
-}
 GuarkState Playeron_Trackselect(GtkMenuItem *widget, gpointer user_data) {
 
 	strcpy(Guark_data.playsource,gtk_menu_item_get_label(widget));
