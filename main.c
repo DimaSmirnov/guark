@@ -19,7 +19,7 @@
 int main (int argc, char *argv[]) {
 
 	if (proc_find("guark")==2) { // Если пытаемся запустить еще 1 гварк
-		// Добавляем файл argv[1] в плейлист
+		Guarkplaylist_addInto(argv[1]); // Добавляем файл argv[1] в плейлист
 		return 1;
 	}
 	Guark_data.state = Sound_init(argc, &argv[0]);

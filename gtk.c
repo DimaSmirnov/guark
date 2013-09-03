@@ -94,6 +94,7 @@ GuarkState Createmenu() {
 	image = gtk_image_new_from_pixbuf(buf);
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM (menuitem_3), image);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem_3);
+	gtk_widget_set_sensitive (menuitem_3,FALSE); // diable playlist
 
 	buf = gdk_pixbuf_new_from_file_at_size("/usr/share/pixmaps/guark/rewind.png", 16,16, NULL);
 	image = gtk_image_new_from_pixbuf(buf);
@@ -125,19 +126,7 @@ GuarkState Createmenu() {
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem_6);
 	gtk_widget_show_all(menu);
 
-
-	submenu = gtk_menu_new(); // Submenu init
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM(menuitem_3), submenu);
-	gtk_widget_set_sensitive (menuitem_3,FALSE); // gray-out submenu. it is TEST option temporary
-
-	menuitem_7 = gtk_image_menu_item_new_with_label("Clear playlist"); // Submenu starts here
-	buf = gdk_pixbuf_new_from_file_at_size("/usr/share/pixmaps/guark/guark.png", 16,16, NULL);
-	image = gtk_image_new_from_pixbuf(buf);
-	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM (menuitem_7), image);
-	gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem_7);
-	g_signal_connect(menuitem_7, "activate",(GCallback) Playeron_ClearPlaylist, widget);
-
-	gtk_widget_show_all(submenu);
+	Guarkplaylist_Show();
 
 	g_timeout_add (1000, (GSourceFunc) get_song_position, Guark_data.pipeline);
 	return 0;

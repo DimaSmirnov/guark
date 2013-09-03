@@ -20,7 +20,8 @@
 	GuarkState Playeron_Stop();
 	GuarkState Playeron_Changetrack();
 	GuarkState Guarkdecoder_set(char*);
-
+	void Guarkplaylist_Show();
+	
   GstElement *audio, *filesrc, *decoder, *demuxer, *filter, *sink, *volume;
   GstElement *convert1, *convert2, *resample;
   GMainLoop *loop;
