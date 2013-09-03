@@ -18,8 +18,10 @@
 
 int main (int argc, char *argv[]) {
 
-	if (proc_find("guark")==2) return 1; // Если пытаемся запустить еще 1 гварк
-
+	if (proc_find("guark")==2) { // Если пытаемся запустить еще 1 гварк
+		// Добавляем файл argv[1] в плейлист
+		return 1;
+	}
 	Guark_data.state = Sound_init(argc, &argv[0]);
 	tray_icon = Guark_Init(argc, &argv[0]);
 	Guarkplaylist_Init();
@@ -35,3 +37,5 @@ int main (int argc, char *argv[]) {
 	Guark_data.state = Sound_Deinit();
   return 0;
 }
+
+// vim: noai:ts=2:sw=2
