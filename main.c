@@ -18,20 +18,28 @@ int main (int argc, char *argv[]) {
 
 	remove("/tmp/guark.status");
 	if (proc_find("guark")==2) { // Если пытаемся запустить еще 1 гварк
-		Guarkplaylist_addInto(argv[1]); // Добавляем файл argv[1] в плейлист
+		if (argv[1]) {
+			Guarkplaylist_addInto(argv[1]); // Добавляем файл argv[1] в плейлист
+		}
 		return 0;
 	}
-	Guark_data.state = Sound_init(argc, &argv[0]);
+	gst_init (&argc, &argv);
+	loop = g_main_loop_new (NULL, FALSE);
+	Guark_data.state = Sound_init();
+	int i = Guarkplaylist_Read();
 	tray_icon = Guark_Init(argc, &argv[0]);
-	Guarkplaylist_Read();
+	if (!tray_icon) return 0;
+	if (argv[1]) {
+		Guarkplaylist_addInto(argv[1]);
+		Guarkplaylist_Read();
+		Guark_data.playlistpos=Guark_data.inplaylist-1;
+	}
 	GuarkState ret = Createmenu();
-
-
-	if (argv[1]) Guarkplaylist_addInto(argv[1]);
-	else Guarkplaylist_addInto("http://uk2.mrgigabit.com:8000");
-
-
 	Guark_data.state = Sound_Play();
+
+	//Guarkplaylist_addInto("http://uk2.mrgigabit.com:8000");
+
+
 	gtk_main();
 	Guark_data.state = Sound_Deinit();
   return 0;

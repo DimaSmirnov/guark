@@ -44,15 +44,8 @@ void Playeron_Quit() {
 	printf("Bye-bye\n");
 	gtk_main_quit ();
 }
-void Playeron_Prevsong() {
-
-	printf("Prev song\n");
-}
-void Playeron_Nextsong() {
-
-	printf("Next song\n");
-}
 GuarkState Playeron_Start() {
+
 	gst_element_set_state (Guark_data.pipeline, GST_STATE_PLAYING);
 	Guark_data.state=GUARK_STATE_PLAYING;
 	printf("Start playing\n");
@@ -63,18 +56,10 @@ GuarkState Playeron_Stop() {
 	Guark_data.state=2;
 	printf("Stop playing\n");
 }
-GuarkState Playeron_Changetrack() {
-	printf("Change track or stream off\n");
-	if (Guark_data.tracktype == GUARK_STREAM) { //if stream fail - restart
-		Playeron_Stop();
-		Playeron_Start();
-	}
-}
 
 GuarkState Createmenu() {
 
-
-
+	if (menu) gtk_menu_detach((GtkMenu*)menu);
 	menu = gtk_menu_new();
 	menuitem_1 = gtk_image_menu_item_new_with_label("Previously");
 	menuitem_2 = gtk_image_menu_item_new_with_label("Next");
@@ -92,16 +77,18 @@ GuarkState Createmenu() {
 	buf = gdk_pixbuf_new_from_file_at_size("/usr/share/pixmaps/guark/rewind.png", 16,16, NULL);
 	image = gtk_image_new_from_pixbuf(buf);
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM (menuitem_1), image);
-	g_signal_connect(menuitem_1, "activate",(GCallback) Playeron_Prevsong, widget);
+	g_signal_connect(menuitem_1, "activate",(GCallback) Guarkplaylist_PlayPrev, widget);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem_1);
-	gtk_widget_set_sensitive (menuitem_1,FALSE); // gray-out menu item
+  if (Guark_data.inplaylist>1) gtk_widget_set_sensitive (menuitem_1,TRUE); // enable playlist
+	else gtk_widget_set_sensitive (menuitem_1,FALSE); // disable playlist
 
 	buf = gdk_pixbuf_new_from_file_at_size("/usr/share/pixmaps/guark/forward.png", 16,16, NULL);
 	image = gtk_image_new_from_pixbuf(buf);
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM (menuitem_2), image);
-	g_signal_connect(menuitem_2, "activate",(GCallback) Playeron_Nextsong, widget);
+	g_signal_connect(menuitem_2, "activate",(GCallback) Guarkplaylist_PlayNext, widget);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem_2);
-	gtk_widget_set_sensitive (menuitem_2,FALSE); // gray-out menu item
+  if (Guark_data.inplaylist>1) gtk_widget_set_sensitive (menuitem_2,TRUE); // enable playlist
+	else gtk_widget_set_sensitive (menuitem_2,FALSE); // disable playlist
 
 	buf = gdk_pixbuf_new_from_file_at_size("/usr/share/pixmaps/guark/play.png", 16,16, NULL);
 	image = gtk_image_new_from_pixbuf(buf);
@@ -133,7 +120,10 @@ static GtkStatusIcon *Guark_Init(int argc, char *argv[]) {
 
 				Guark_playlist = calloc(1, sizeof(struct _Guarkplaylist));
 				Guark_data.playlistpos=0;
-
+				if (!argv[1] && !Guark_data.inplaylist) {
+					printf("Для запуска используйте путь до трека в аргументе\n");
+					return 0;
+				}
 				gtk_init(&argc, &argv);
 
         tray_icon = gtk_status_icon_new();

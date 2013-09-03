@@ -1,14 +1,21 @@
 
-int Guarkplaylist_getNext() {
-	int i = Guark_data.playlistpos;
-	i++;
-	return i;
+int Guarkplaylist_PlayNext() {
+
+	if (Guark_data.playlistpos < Guark_data.inplaylist-1) Guark_data.playlistpos++;
+	else Guark_data.playlistpos=0;
+	Sound_init();
+	Guark_data.state = Sound_Play();
+	Guarkplaylist_Show();
+	return Guark_data.playlistpos;
 }
 
-int Guarkplaylist_getPrev() {
-	int i = Guark_data.playlistpos;
-	i--;
-	return i;
+int Guarkplaylist_PlayPrev() {
+	if (Guark_data.playlistpos > 0)Guark_data.playlistpos--;
+	else Guark_data.playlistpos=Guark_data.inplaylist-1;
+	Sound_init();
+	Guark_data.state = Sound_Play();
+	Guarkplaylist_Show();
+	return Guark_data.playlistpos;
 }
 
 int Guarkplaylist_addInto(char* trackpath) {
@@ -28,6 +35,7 @@ void Guarkplaylist_Clear() {
 	printf("Clear playlist\n");
 	remove("/tmp/guark.playlist");
 	Guarkplaylist_Read();
+	Createmenu();
 	Guarkplaylist_Show();
 }
 int Guarkplaylist_CheckUpdateStatus() {
@@ -37,12 +45,12 @@ int Guarkplaylist_CheckUpdateStatus() {
 		fclose(pFile);
 		remove("/tmp/guark.status");
 		Guarkplaylist_Read();
+		GuarkState ret = Createmenu();
 		Guarkplaylist_Show();
 	}
 	return TRUE;
 }
 int Guarkplaylist_Read() {
-
 
 	Guark_data.inplaylist=0;
 	pFile1=fopen("/tmp/guark.playlist","r");
@@ -59,16 +67,18 @@ int Guarkplaylist_Read() {
 		temp_string[strlen(temp_string)-1] = '\0';
 		strcpy(Guark_playlist[i].track,temp_string);
 	}
+	//Guark_data.inplaylist--;
 	fclose(pFile1);
-	printf("Playlist reads\n");
-	return 0;
+	return Guark_data.inplaylist;
 }
 int Guarkplaylist_Trackselect(GtkMenuItem *widget, gpointer user_data) {
 
 	strcpy(Guark_data.playsource,gtk_menu_item_get_label(widget));
-	strcpy(temp_string,strtok(Guark_data.playsource,"."));
-
-	printf("Select track %s from playlist\n",Guark_data.playsource);
+	strcpy(temp_string,strtok(Guark_data.playsource,": "));
+	Sound_init();
+	Guark_data.playlistpos = atoi(temp_string)-1;
+	Guark_data.state = Sound_Play();
+	Guarkplaylist_Show();
 }
 void Guarkplaylist_Show() {
 
@@ -86,17 +96,17 @@ void Guarkplaylist_Show() {
 	else gtk_widget_set_sensitive (menuitem_3,FALSE); // disable playlist
 
 	for (int i=0; i<Guark_data.inplaylist; i++) {
-		sprintf(temp_string,"%d. %s",i+1,Guark_playlist[i].track);
+		sprintf(temp_string,"%d: %s",i+1,Guark_playlist[i].track);
 		if (Guark_data.playlistpos==i) {
   		menuitem_8 = gtk_image_menu_item_new_with_label(temp_string); // Show tracks from playlist
-  		buf = gdk_pixbuf_new_from_file_at_size("/usr/share/pixmaps/guark/guark.png", 16,16, NULL);
+  		buf = gdk_pixbuf_new_from_file_at_size("/usr/share/pixmaps/guark/play.png", 16,16, NULL);
   		image = gtk_image_new_from_pixbuf(buf);
   		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM (menuitem_8), image);
 		}
 		else {
 			menuitem_8 = gtk_menu_item_new_with_label(temp_string);
 		}
-		printf("Show %s in playlist\n", Guark_playlist[i].track);
+		//printf("Show %s in playlist\n", Guark_playlist[i].track);
   	gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem_8);
   	g_signal_connect(menuitem_8, "activate",(GCallback) Guarkplaylist_Trackselect, widget);
 	}

@@ -13,7 +13,7 @@
 	} GuarkDecoderType;
 
 	GuarkState Sound_Play();
-	GuarkState Sound_init(int, char**);
+	GuarkState Sound_init();
 	GuarkState Sound_Deinit();
 	GuarkState Createmenu();
 	GuarkState Playeron_Start();
@@ -23,6 +23,8 @@
 	void Guarkplaylist_Show();
 	int Guarkplaylist_Read();
 	int Guarkplaylist_CheckUpdateStatus();
+	int Guarkplaylist_PlayPrev();
+	int Guarkplaylist_PlayNext();
 
   GstElement *audio, *filesrc, *decoder, *demuxer, *filter, *sink, *volume;
   GstElement *convert1, *convert2, *resample;

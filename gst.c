@@ -61,7 +61,9 @@ static gboolean bus_call (GstBus *bus, GstMessage *msg, gpointer data) {
       g_print ("End-of-stream\n");
       g_main_loop_quit (loop);
       Guark_data.state = GUARK_TRACK_ENDS;
-      Playeron_Changetrack();
+
+      Playeron_Stop();
+			Playeron_Start();
       break;
      }
     case GST_MESSAGE_ERROR: {
@@ -101,9 +103,9 @@ static void on_pad_added (GstElement *element, GstPad     *pad, gpointer    data
   gst_pad_link (pad, sinkpad);
   gst_object_unref (sinkpad);
 }
-GuarkState Sound_init(int argc, char *argv[]) {
-	gst_init (&argc, &argv);
-	loop = g_main_loop_new (NULL, FALSE);
+GuarkState Sound_init() {
+
+	if (Guark_data.pipeline) gst_element_set_state (Guark_data.pipeline, GST_STATE_NULL);
 	Guark_data.pipeline = gst_pipeline_new ("guark_pipeline");
 	bus = gst_pipeline_get_bus (GST_PIPELINE (Guark_data.pipeline));
 	watch_id = gst_bus_add_watch (bus, bus_call, loop);
@@ -139,7 +141,7 @@ GuarkState Sound_Play() {
     return GUARK_STATE_NULL;
 	}
 	Guark_data.state = GUARK_STATE_PLAYING;
-	g_print ("Now playing: %s\n", Guark_data.playsource);
+	g_print ("Now playing: '%s'\n", Guark_data.playsource);
 	return GUARK_STATE_PLAYING;
 }
 int proc_find(const char* name) {
