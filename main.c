@@ -7,7 +7,6 @@
 #include <gst/gst.h>
 #include <gdk/gdk.h>
 
-
 #include "variables.h"
 #include "gst.c"
 #include "decoder.c"
@@ -15,16 +14,16 @@
 #include "playlist.c"
 
 
-
 int main (int argc, char *argv[]) {
 
+	remove("/tmp/guark.status");
 	if (proc_find("guark")==2) { // Если пытаемся запустить еще 1 гварк
 		Guarkplaylist_addInto(argv[1]); // Добавляем файл argv[1] в плейлист
-		return 1;
+		return 0;
 	}
 	Guark_data.state = Sound_init(argc, &argv[0]);
 	tray_icon = Guark_Init(argc, &argv[0]);
-	Guarkplaylist_Init();
+	Guarkplaylist_Read();
 	GuarkState ret = Createmenu();
 
 

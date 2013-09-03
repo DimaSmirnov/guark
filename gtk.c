@@ -70,11 +70,7 @@ GuarkState Playeron_Changetrack() {
 		Playeron_Start();
 	}
 }
-GuarkState Playeron_Trackselect(GtkMenuItem *widget, gpointer user_data) {
 
-	strcpy(Guark_data.playsource,gtk_menu_item_get_label(widget));
-	printf("Select track %s from playlist\n",Guark_data.playsource);
-}
 GuarkState Createmenu() {
 
 
@@ -126,6 +122,8 @@ GuarkState Createmenu() {
 	Guarkplaylist_Show();
 
 	g_timeout_add (1000, (GSourceFunc) get_song_position, Guark_data.pipeline);
+	g_timeout_add (500, (GSourceFunc) Guarkplaylist_CheckUpdateStatus, Guark_data.pipeline);
+
 	return 0;
 }
 void ActionTrayIcon_OnMenu(GtkWidget *widget, GdkEvent *event) { // Show main menu
@@ -134,6 +132,8 @@ void ActionTrayIcon_OnMenu(GtkWidget *widget, GdkEvent *event) { // Show main me
 static GtkStatusIcon *Guark_Init(int argc, char *argv[]) {
 
 				Guark_playlist = calloc(1, sizeof(struct _Guarkplaylist));
+				Guark_data.playlistpos=0;
+
 				gtk_init(&argc, &argv);
 
         tray_icon = gtk_status_icon_new();

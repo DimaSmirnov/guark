@@ -46,7 +46,9 @@ gboolean get_song_position (GstElement *pipeline) {
 	else if (Guark_data.state==GUARK_STATE_PAUSED) strcpy(tooltip_string,"PAUSE. ");
 	else if (Guark_data.state==GUARK_STATE_PLAYING) strcpy(tooltip_string,"PLAY. ");
 	strcat(tooltip_string, Guark_data.timestamp_string);
-	strcat(tooltip_string, "\nGuark");
+	strcat(tooltip_string, "\n");
+	strcat(tooltip_string,Guark_data.playsource);
+	strcat(tooltip_string, " // Guark");
 	gtk_status_icon_set_tooltip(tray_icon, tooltip_string); //Update title status
 
   return TRUE;
@@ -114,10 +116,12 @@ GuarkState Sound_Deinit() {
   gst_object_unref (Guark_data.pipeline);
   g_source_remove (watch_id);
 	g_main_loop_unref (loop);
+	remove("/tmp/guark.status");
 	return GUARK_STATE_NULL;
 }
 GuarkState Sound_Play() {
 	// Сначала берем трек из плейлиста, затем устанавливаем его декодеры и запускаем его
+	strcpy(Guark_data.playsource,Guark_playlist[Guark_data.playlistpos].track);
 
 	if (Guarkdecoder_set(Guark_data.playsource)==GUARK_STATE_NULL) return GUARK_STATE_NULL; // Устанавливаем декодеры
 	Guark_data.state = gst_element_set_state (Guark_data.pipeline, GST_STATE_PLAYING);   // Запускаем файл

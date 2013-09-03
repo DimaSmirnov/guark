@@ -21,7 +21,8 @@
 	GuarkState Playeron_Changetrack();
 	GuarkState Guarkdecoder_set(char*);
 	void Guarkplaylist_Show();
-	void Guarkplaylist_Init();
+	int Guarkplaylist_Read();
+	int Guarkplaylist_CheckUpdateStatus();
 
   GstElement *audio, *filesrc, *decoder, *demuxer, *filter, *sink, *volume;
   GstElement *convert1, *convert2, *resample;
@@ -37,6 +38,9 @@
 	GtkWidget *widget;
 	GdkPixbuf *buf;
 
+	FILE *pFile,*pFile1;
+	char temp_string[500];
+
 	struct _Guarkplaylist {	//Playlist array
 			char track[500];				// Path to track
 			char short_track[500];	//Short track name (without / in path)
@@ -45,7 +49,7 @@
 	typedef struct _Guarkdata {
 		GstElement *pipeline;				// guark pipeline
 		GstStateChangeReturn state;	// Current state of tracker (GstStateChangeReturn)
-		char playsource[255];				// Current song
+		char playsource[500];				// Current song
 		int playlistpos;						// Current position in playlist
 		int inplaylist;	// Кол-во треков в плейлисте
 		int tracktype;							// Type of track (GuarkDecoderType)
