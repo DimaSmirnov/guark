@@ -19,6 +19,9 @@ int Guarkplaylist_PlayPrev() {
 }
 
 int Guarkplaylist_addInto(char* trackpath) {
+	if (!strstr(trackpath,".mp3") &&
+	!strstr(trackpath,".ogg") &&
+	!strstr(trackpath,"http://")) return 1; // Если подсунули неверный файл, то выходим с единицей
 
 	pFile1=fopen("/tmp/guark.playlist","a");
 	if (pFile1) {

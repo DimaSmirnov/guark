@@ -15,22 +15,23 @@
 
 
 int main (int argc, char *argv[]) {
+	int i;
 
-	remove("/tmp/guark.status");
 	if (proc_find("guark")==2) { // Если пытаемся запустить еще 1 гварк
-		if (argv[1]) {
-			Guarkplaylist_addInto(argv[1]); // Добавляем файл argv[1] в плейлист
-		}
+		if (argv[1]) i = Guarkplaylist_addInto(argv[1]); // Добавляем файл argv[1] в плейлист
+		if (i) return 0;
 		return 0;
 	}
+
 	gst_init (&argc, &argv);
+	remove("/tmp/guark.status");
 	loop = g_main_loop_new (NULL, FALSE);
 	Guark_data.state = Sound_init();
-	int i = Guarkplaylist_Read();
 	tray_icon = Guark_Init(argc, &argv[0]);
 	if (!tray_icon) return 0;
 	if (argv[1]) {
-		Guarkplaylist_addInto(argv[1]);
+		i = Guarkplaylist_addInto(argv[1]);
+		if (i) return 0;
 		Guarkplaylist_Read();
 		Guark_data.playlistpos=Guark_data.inplaylist-1;
 	}

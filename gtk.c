@@ -59,7 +59,7 @@ GuarkState Playeron_Stop() {
 
 GuarkState Createmenu() {
 
-	if (menu) gtk_menu_detach((GtkMenu*)menu);
+	//if (menu) gtk_menu_detach((GtkMenu*)menu);
 	menu = gtk_menu_new();
 	menuitem_1 = gtk_image_menu_item_new_with_label("Previously");
 	menuitem_2 = gtk_image_menu_item_new_with_label("Next");
@@ -119,6 +119,7 @@ void ActionTrayIcon_OnMenu(GtkWidget *widget, GdkEvent *event) { // Show main me
 static GtkStatusIcon *Guark_Init(int argc, char *argv[]) {
 
 				Guark_playlist = calloc(1, sizeof(struct _Guarkplaylist));
+				Guark_data.inplaylist = Guarkplaylist_Read();
 				Guark_data.playlistpos=0;
 				if (!argv[1] && !Guark_data.inplaylist) {
 					printf("Для запуска используйте путь до трека в аргументе\n");
