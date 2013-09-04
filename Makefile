@@ -9,7 +9,7 @@ install: guark
 	cp icons/forward.png /usr/share/pixmaps/guark/forward.png
 	cp icons/stop.png /usr/share/pixmaps/guark/stop.png
 	cp icons/play.png /usr/share/pixmaps/guark/play.png
-
+	cp icons/pause.png /usr/share/pixmaps/guark/pause.png
 uninstall: guark
 	rm /usr/bin/guark
 	rm -r /usr/share/pixmaps/guark/

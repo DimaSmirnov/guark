@@ -30,6 +30,7 @@
   GstElement *convert1, *convert2, *resample;
   GMainLoop *loop;
   GstBus *bus;
+  GstTagList *tags;
   guint watch_id;
 
 	GtkWidget *response_widget;
@@ -42,6 +43,7 @@
 
 	FILE *pFile,*pFile1;
 	char temp_string[500];
+	char tooltip_string[200];
 
 	struct _Guarkplaylist {	//Playlist array
 			char track[500];				// Path to track

@@ -71,7 +71,7 @@ int Guarkplaylist_Read() {
 		strcpy(Guark_playlist[i].track,temp_string);
 	}
 	fclose(pFile1);
-	Guark_data.playlistpos = Guark_data.inplaylist-1; //Если добавили трек в плейлист, то запускаем его
+	Guark_data.playlistpos = Guark_data.inplaylist-1; // Start added track
 	Sound_init();
 	Guark_data.state = Sound_Play();
 	return Guark_data.inplaylist;

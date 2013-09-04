@@ -26,6 +26,7 @@ int main (int argc, char *argv[]) {
 	gst_init (&argc, &argv);
 	remove("/tmp/guark.status");
 	loop = g_main_loop_new (NULL, FALSE);
+	tags = gst_tag_list_new();
 	Guark_data.state = Sound_init();
 	tray_icon = Guark_Init(argc, &argv[0]);
 	if (!tray_icon) return 0;
