@@ -47,7 +47,7 @@ int Guarkplaylist_CheckUpdateStatus() {
 	if (pFile != NULL) { // Need to update playlist
 		fclose(pFile);
 		remove("/tmp/guark.status");
-		Guarkplaylist_Read();
+		int a = Guarkplaylist_Read();
 		GuarkState ret = Createmenu();
 		Guarkplaylist_Show();
 	}
@@ -70,10 +70,13 @@ int Guarkplaylist_Read() {
 		temp_string[strlen(temp_string)-1] = '\0';
 		strcpy(Guark_playlist[i].track,temp_string);
 	}
-	//Guark_data.inplaylist--;
 	fclose(pFile1);
+	Guark_data.playlistpos = Guark_data.inplaylist-1; //Если добавили трек в плейлист, то запускаем его
+	Sound_init();
+	Guark_data.state = Sound_Play();
 	return Guark_data.inplaylist;
 }
+
 int Guarkplaylist_Trackselect(GtkMenuItem *widget, gpointer user_data) {
 
 	strcpy(Guark_data.playsource,gtk_menu_item_get_label(widget));
@@ -109,12 +112,10 @@ void Guarkplaylist_Show() {
 		else {
 			menuitem_8 = gtk_menu_item_new_with_label(temp_string);
 		}
-		//printf("Show %s in playlist\n", Guark_playlist[i].track);
   	gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem_8);
   	g_signal_connect(menuitem_8, "activate",(GCallback) Guarkplaylist_Trackselect, widget);
 	}
 	gtk_widget_show_all(submenu);
-	//printf("Playlist updated\n");
 }
 
 // vim: noai:ts=2:sw=2:syntax=c

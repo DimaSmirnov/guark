@@ -53,7 +53,7 @@
 		GstStateChangeReturn state;	// Current state of tracker (GstStateChangeReturn)
 		char playsource[500];				// Current song
 		int playlistpos;						// Current position in playlist
-		int inplaylist;	// Кол-во треков в плейлисте
+		int inplaylist;							// Кол-во треков в плейлисте
 		int tracktype;							// Type of track (GuarkDecoderType)
 		gint64 duration;						// Duration of the song
 		gint64 current_pos;					// Current song position

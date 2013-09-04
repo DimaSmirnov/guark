@@ -33,13 +33,11 @@ int main (int argc, char *argv[]) {
 		i = Guarkplaylist_addInto(argv[1]);
 		if (i) return 0;
 		Guarkplaylist_Read();
-		Guark_data.playlistpos=Guark_data.inplaylist-1;
 	}
 	GuarkState ret = Createmenu();
 	Guark_data.state = Sound_Play();
 
 	//Guarkplaylist_addInto("http://uk2.mrgigabit.com:8000");
-
 
 	gtk_main();
 	Guark_data.state = Sound_Deinit();
