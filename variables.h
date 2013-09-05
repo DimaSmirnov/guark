@@ -13,7 +13,7 @@
 	} GuarkDecoderType;
 
 	GuarkState Sound_Play();
-	GuarkState Sound_init();
+	GstElement * Sound_init(char*);
 	GuarkState Sound_Deinit();
 	GuarkState Createmenu();
 	GuarkState Playeron_Start();
@@ -26,12 +26,13 @@
 	int Guarkplaylist_PlayPrev();
 	int Guarkplaylist_PlayNext();
 
-  GstElement *audio, *filesrc, *decoder, *demuxer, *filter, *sink, *volume;
-  GstElement *convert1, *convert2, *resample;
-  GMainLoop *loop;
+  GstElement *sink, *volume;
   GstBus *bus;
   GstTagList *tags;
+	GError *error = NULL;
   guint watch_id;
+	GstElement *playbin;
+	GMainLoop *loop;
 
 	GtkWidget *response_widget;
 	GtkWidget *menu, *menuitem_1, *menuitem_2, *menuitem_3, *menuitem_4, *menuitem_5, *menuitem_6, *menuitem_7, *menuitem_8;

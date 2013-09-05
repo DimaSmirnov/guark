@@ -3,7 +3,7 @@ int Guarkplaylist_PlayNext() {
 
 	if (Guark_data.playlistpos < Guark_data.inplaylist-1) Guark_data.playlistpos++;
 	else Guark_data.playlistpos=0;
-	Sound_init();
+	Sound_init(Guark_playlist[Guark_data.playlistpos].track);
 	Guark_data.state = Sound_Play();
 	Guarkplaylist_Show();
 	return Guark_data.playlistpos;
@@ -12,7 +12,7 @@ int Guarkplaylist_PlayNext() {
 int Guarkplaylist_PlayPrev() {
 	if (Guark_data.playlistpos > 0)Guark_data.playlistpos--;
 	else Guark_data.playlistpos=Guark_data.inplaylist-1;
-	Sound_init();
+	Sound_init(Guark_playlist[Guark_data.playlistpos].track);
 	Guark_data.state = Sound_Play();
 	Guarkplaylist_Show();
 	return Guark_data.playlistpos;
@@ -47,9 +47,12 @@ int Guarkplaylist_CheckUpdateStatus() {
 	if (pFile != NULL) { // Need to update playlist
 		fclose(pFile);
 		remove("/tmp/guark.status");
-		int a = Guarkplaylist_Read();
+		Guark_data.inplaylist = Guarkplaylist_Read();
 		GuarkState ret = Createmenu();
 		Guarkplaylist_Show();
+		Guark_data.playlistpos = Guark_data.inplaylist-1; // Start added track
+		Sound_init(Guark_playlist[Guark_data.playlistpos].track);
+		Guark_data.state = Sound_Play();
 	}
 	return TRUE;
 }
@@ -71,9 +74,7 @@ int Guarkplaylist_Read() {
 		strcpy(Guark_playlist[i].track,temp_string);
 	}
 	fclose(pFile1);
-	Guark_data.playlistpos = Guark_data.inplaylist-1; // Start added track
-	Sound_init();
-	Guark_data.state = Sound_Play();
+
 	return Guark_data.inplaylist;
 }
 
@@ -81,8 +82,8 @@ int Guarkplaylist_Trackselect(GtkMenuItem *widget, gpointer user_data) {
 
 	strcpy(Guark_data.playsource,gtk_menu_item_get_label(widget));
 	strcpy(temp_string,strtok(Guark_data.playsource,": "));
-	Sound_init();
 	Guark_data.playlistpos = atoi(temp_string)-1;
+	Sound_init(Guark_playlist[Guark_data.playlistpos].track);
 	Guark_data.state = Sound_Play();
 	Guarkplaylist_Show();
 }

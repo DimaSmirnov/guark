@@ -9,7 +9,6 @@
 
 #include "variables.h"
 #include "gst.c"
-#include "decoder.c"
 #include "gtk.c"
 #include "playlist.c"
 
@@ -27,14 +26,20 @@ int main (int argc, char *argv[]) {
 	remove("/tmp/guark.status");
 	loop = g_main_loop_new (NULL, FALSE);
 	tags = gst_tag_list_new();
-	Guark_data.state = Sound_init();
-	tray_icon = Guark_Init(argc, &argv[0]);
+	if (!(tray_icon = Guark_Init(argc, &argv[0]))) return 0;
+	Guark_data.playlistpos = Guark_data.inplaylist-1; // Start last track
+	printf (":::: %s\n",Guark_playlist[Guark_data.playlistpos].track);
+	if (argv[1]) Guark_data.pipeline = Sound_init(argv[1]);
+	else Guark_data.pipeline = Sound_init(Guark_playlist[Guark_data.playlistpos].track);
+
+
 	if (!tray_icon) return 0;
 	if (argv[1]) {
 		i = Guarkplaylist_addInto(argv[1]);
 		if (i) return 0;
 		Guarkplaylist_Read();
 	}
+
 	GuarkState ret = Createmenu();
 	Guark_data.state = Sound_Play();
 

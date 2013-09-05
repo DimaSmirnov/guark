@@ -7,8 +7,7 @@
 GstTagList *tags;
 
 
-static void print_tags()
-{
+static void print_tags() {
   gchar *artist = "Artist";
   gchar *title = "Music";
 
@@ -18,12 +17,9 @@ static void print_tags()
   g_print("%s - %s :", artist, title);
 }
 
-static gboolean cb_print_position (GstElement *pipeline)
-{
+static gboolean cb_print_position (GstElement *pipeline) {
   GstFormat fmt = GST_FORMAT_TIME;
   gint64 pos, len;
-
-  /* Keep printing informations about the media that is playing */
 
   print_tags();
 
@@ -37,10 +33,7 @@ static gboolean cb_print_position (GstElement *pipeline)
   return TRUE;
 }
 
-static gboolean bus_call (GstBus     *bus,
-          GstMessage *msg,
-          gpointer    data)
-{
+static gboolean bus_call (GstBus     *bus,GstMessage *msg,gpointer    data) {
   GMainLoop *loop = (GMainLoop *) data;
 
   switch (GST_MESSAGE_TYPE (msg)) {
@@ -78,21 +71,17 @@ static gboolean bus_call (GstBus     *bus,
       break;
   }
 
-  /* call me again */
   return TRUE;
 }
 
-static void add_bus_watch(GstElement *pipeline,
-              GMainLoop *loop)
-{
+static void add_bus_watch(GstElement *pipeline,GMainLoop *loop) {
   GstBus *bus;
   bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
   gst_bus_add_watch (bus, bus_call, loop);
   gst_object_unref (bus);
 }
 
-static GstElement *init_pipeline(GMainLoop *loop)
-{
+static GstElement *init_pipeline(GMainLoop *loop) {
   GstElement *playbin;
 
   /* Create gstreamer elements */
@@ -108,43 +97,33 @@ static GstElement *init_pipeline(GMainLoop *loop)
   return playbin;
 }
 
-gboolean set_uri(GstElement *playbin,
-        const char *uri)
-{
+gboolean set_uri(GstElement *playbin, const char *uri) {
   /* Set the input filename to the source element */
   GError *error = NULL;
   g_object_set (G_OBJECT (playbin), "uri",
-      gst_filename_to_uri(uri, &error), NULL);
+	gst_filename_to_uri(uri, &error), NULL);
 
   if (error) {
-      g_print("Filename to URI error: %s\n", error->message);
-      g_error_free(error);
-
-      return FALSE;
+		g_print("Filename to URI error: %s\n", error->message);
+		g_error_free(error);
+	return FALSE;
   }
-
-  return TRUE;
+return TRUE;
 }
 
-gint
-main (int   argc,
-      char *argv[])
-{
+gint main (int   argc, char *argv[]) {
   GMainLoop *loop;
   GstElement *pipeline;
   gint i;
 
-  /* Initialisation */
-  gst_init (&argc, &argv);
+  gst_init (&argc, &argv); //
 
-  if (argc < 2)
-    g_error ("Usage: %s   ...", argv[0]);
+  if (argc < 2) g_error ("Usage: %s   ...", argv[0]);
 
-  loop = g_main_loop_new (NULL, FALSE);
-  pipeline = init_pipeline(loop);
+  loop = g_main_loop_new (NULL, FALSE);//
+  pipeline = init_pipeline(loop);//
 
-  if (!pipeline)
-    return -1;
+  if (!pipeline) return -1;
 
   g_timeout_add (200, (GSourceFunc) cb_print_position, pipeline);
 

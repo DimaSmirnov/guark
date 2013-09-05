@@ -3,10 +3,10 @@ static void print_tags() {
   gchar *title = "Music";
 
   /* If already known, get the Artist and Title tags of the media  */
-  if (gst_tag_list_get_string(tags, GST_TAG_ARTIST, &artist) ||
-  gst_tag_list_get_string(tags, GST_TAG_TITLE, &title)) {
-		g_print("%s - %s :", artist, title);
-	}
+  gst_tag_list_get_string(tags, GST_TAG_ARTIST, &artist);
+  gst_tag_list_get_string(tags, GST_TAG_TITLE, &title);
+
+	g_print("Artist-title: %s - %s\r", artist, title);
 }
 
 gboolean get_song_position (GstElement *pipeline) {
@@ -47,8 +47,11 @@ static gboolean bus_call (GstBus *bus, GstMessage *msg, gpointer data) {
       g_main_loop_quit (loop);
       Guark_data.state = GUARK_TRACK_ENDS;
 
-      Playeron_Stop();
-			Playeron_Start();
+      if(Guark_data.tracktype==GUARK_STREAM) {
+				Playeron_Stop();
+				Playeron_Start();
+			}
+			else gtk_menu_item_activate(GTK_MENU_ITEM (menuitem_2)); // Трек закончился, переходим к следующему
       break;
      }
     case GST_MESSAGE_ERROR: {
@@ -71,43 +74,41 @@ static gboolean bus_call (GstBus *bus, GstMessage *msg, gpointer data) {
 		gst_tag_list_free (newTags);
 		break;
 	}
-
     default:
       break;
   }
   return TRUE;
 }
-static void on_pad_added (GstElement *element, GstPad     *pad, gpointer    data) {
-  GstPad *sinkpad;
-  GstElement *decoder = (GstElement *) data;
 
-  sinkpad = gst_element_get_static_pad (decoder, "sink");
-  gst_pad_link (pad, sinkpad);
-  gst_object_unref (sinkpad);
-}
-GuarkState Sound_init() {
+GstElement * Sound_init(char *filename) {
 
-	if (Guark_data.pipeline) gst_element_set_state (Guark_data.pipeline, GST_STATE_NULL);
-	Guark_data.pipeline = gst_pipeline_new ("guark_pipeline");
-	bus = gst_pipeline_get_bus (GST_PIPELINE (Guark_data.pipeline));
-	watch_id = gst_bus_add_watch (bus, bus_call, loop);
-	gst_object_unref (bus);
-	return GUARK_STATE_READY;
+
+	gst_element_set_state (Guark_data.pipeline, GST_STATE_NULL);
+	playbin  = gst_element_factory_make ("playbin2", "play");
+	//volume = gst_element_factory_make("volume", "volume");
+	//sink = gst_element_factory_make("audio-sink", "sink");
+  bus = gst_pipeline_get_bus (GST_PIPELINE (playbin));
+
+  //gst_bin_add_many (GST_BIN(bus), volume, sink); // ???
+	//gst_element_link_many (playbin, volume, sink, NULL); // ???
+
+  gst_bus_add_watch (bus, bus_call, loop);
+  gst_object_unref (bus);
+	g_object_set (G_OBJECT (Guark_data.pipeline), "uri", gst_filename_to_uri(filename, &error), NULL);
+	return playbin;
 }
 GuarkState Sound_Deinit() {
 
 	gst_element_set_state (Guark_data.pipeline, GST_STATE_NULL);
-  gst_object_unref (Guark_data.pipeline);
-  g_source_remove (watch_id);
-	g_main_loop_unref (loop);
 	gst_tag_list_free(tags);
+  gst_object_unref (Guark_data.pipeline);
+	g_main_loop_unref (loop);
 	remove("/tmp/guark.status");
 	return GUARK_STATE_NULL;
 }
 GuarkState Sound_Play() {
 
 	strcpy(Guark_data.playsource,Guark_playlist[Guark_data.playlistpos].track); // Get track from playlist
-	if (Guarkdecoder_set(Guark_data.playsource)==GUARK_STATE_NULL) return GUARK_STATE_NULL; // Set decoders
 	Guark_data.state = gst_element_set_state (Guark_data.pipeline, GST_STATE_PLAYING);   // Start track
 	if (Guark_data.state == GST_STATE_CHANGE_FAILURE) {
 		GstMessage *msg;
