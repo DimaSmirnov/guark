@@ -126,23 +126,22 @@ void ActionTrayIcon_OnMenu(GtkWidget *widget, GdkEvent *event) { // Show main me
 }
 static GtkStatusIcon *Guark_Init(int argc, char *argv[]) {
 
-				Guark_playlist = calloc(1, sizeof(struct _Guarkplaylist));
-				Guark_data.inplaylist = Guarkplaylist_Read();
-				//Guark_data.playlistpos=0;
-				if (!argv[1] && !Guark_data.inplaylist) {
-					//printf("Плейлист пуст. Для запуска используйте путь до трека в аргументе\n");
-					printf("Playlist is empty. For start please add path to track as argument\n");
-					return 0;
-				}
-				gtk_init(&argc, &argv);
+	Guark_playlist = calloc(1, sizeof(struct _Guarkplaylist));
+	Guark_data.inplaylist = Guarkplaylist_Read();
+	if (!argv[1] && !Guark_data.inplaylist) {
+		printf("Playlist is empty. For start please add path to track as argument\n");
+		return 0;
+	}
+	gtk_init(&argc, &argv);
 
-        tray_icon = gtk_status_icon_new();
-        g_signal_connect(G_OBJECT(tray_icon), "popup-menu", G_CALLBACK(ActionTrayIcon_OnMenu), NULL);
-        g_signal_connect(G_OBJECT(tray_icon), "activate",G_CALLBACK(ActionTrayIcon_OnMenu), NULL);
-        g_signal_connect(G_OBJECT(tray_icon), "scroll-event",G_CALLBACK(ActionTrayIcon_OnScroll), NULL);
-        gtk_status_icon_set_from_file (tray_icon, "/usr/share/pixmaps/guark/guark.png");
-        gtk_status_icon_set_tooltip(tray_icon, "Guark. Simple audio player");
-        gtk_status_icon_set_visible(tray_icon, TRUE);
-        return tray_icon;
+	tray_icon = gtk_status_icon_new();
+	g_signal_connect(G_OBJECT(tray_icon), "popup-menu", G_CALLBACK(ActionTrayIcon_OnMenu), NULL);
+	g_signal_connect(G_OBJECT(tray_icon), "activate",G_CALLBACK(ActionTrayIcon_OnMenu), NULL);
+	g_signal_connect(G_OBJECT(tray_icon), "scroll-event",G_CALLBACK(ActionTrayIcon_OnScroll), NULL);
+	gtk_status_icon_set_from_file (tray_icon, "/usr/share/pixmaps/guark/guark.png");
+	gtk_status_icon_set_tooltip(tray_icon, "Guark. Simple audio player");
+	gtk_status_icon_set_visible(tray_icon, TRUE);
+	return tray_icon;
 }
 
+// vim: noai:ts=2:sw=2

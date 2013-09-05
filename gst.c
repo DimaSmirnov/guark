@@ -158,3 +158,5 @@ int proc_find(const char* name) {
 	closedir(dir);
 return cntr;
 }
+
+// vim: noai:ts=2:sw=2
