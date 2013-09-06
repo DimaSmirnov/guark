@@ -4,6 +4,7 @@ int Guarkplaylist_PlayNext() {
 	if (Guark_data.playlistpos < Guark_data.inplaylist-1) Guark_data.playlistpos++;
 	else Guark_data.playlistpos=0;
 	Sound_init(Guark_playlist[Guark_data.playlistpos].track);
+
 	Guark_data.state = Sound_Play();
 	Guarkplaylist_Show();
 	return Guark_data.playlistpos;
@@ -48,10 +49,10 @@ int Guarkplaylist_CheckUpdateStatus() {
 		fclose(pFile);
 		remove("/tmp/guark.status");
 		Guark_data.inplaylist = Guarkplaylist_Read();
-		GuarkState ret = Createmenu();
 		Guarkplaylist_Show();
 		Guark_data.playlistpos = Guark_data.inplaylist-1; // Start added track
 		Sound_init(Guark_playlist[Guark_data.playlistpos].track);
+		GuarkState ret = Createmenu();
 		Guark_data.state = Sound_Play();
 	}
 	return TRUE;
@@ -86,6 +87,7 @@ int Guarkplaylist_Trackselect(GtkMenuItem *widget, gpointer user_data) {
 	Sound_init(Guark_playlist[Guark_data.playlistpos].track);
 	Guark_data.state = Sound_Play();
 	Guarkplaylist_Show();
+	return 0;
 }
 void Guarkplaylist_Show() {
 

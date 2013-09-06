@@ -25,26 +25,21 @@ int main (int argc, char *argv[]) {
 	gst_init (&argc, &argv);
 	remove("/tmp/guark.status");
 	loop = g_main_loop_new (NULL, FALSE);
-	tags = gst_tag_list_new();
-	if (!(tray_icon = Guark_Init(argc, &argv[0]))) return 0;
+	tray_icon = Guark_Init(argc, &argv[0]);
 	Guark_data.playlistpos = Guark_data.inplaylist-1; // Start last track
-	printf (":::: %s\n",Guark_playlist[Guark_data.playlistpos].track);
-	if (argv[1]) Guark_data.pipeline = Sound_init(argv[1]);
-	else Guark_data.pipeline = Sound_init(Guark_playlist[Guark_data.playlistpos].track);
 
-
-	if (!tray_icon) return 0;
 	if (argv[1]) {
 		i = Guarkplaylist_addInto(argv[1]);
 		if (i) return 0;
-		Guarkplaylist_Read();
+	}
+	else {
+		Guark_data.pipeline = Sound_init(Guark_playlist[Guark_data.playlistpos].track);
+		Guark_data.state = Sound_Play();
 	}
 
 	GuarkState ret = Createmenu();
-	Guark_data.state = Sound_Play();
 
 	//Guarkplaylist_addInto("http://uk2.mrgigabit.com:8000");
-
 	gtk_main();
 	Guark_data.state = Sound_Deinit();
   return 0;

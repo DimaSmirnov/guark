@@ -132,6 +132,9 @@ static GtkStatusIcon *Guark_Init(int argc, char *argv[]) {
 		printf("Playlist is empty. For start please add path to track as argument\n");
 		return 0;
 	}
+	Guark_data.artist = "Artist";
+	Guark_data.title = "Music";
+
 	gtk_init(&argc, &argv);
 
 	tray_icon = gtk_status_icon_new();

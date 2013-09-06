@@ -42,13 +42,16 @@
 	GtkWidget *widget;
 	GdkPixbuf *buf;
 
+
 	FILE *pFile,*pFile1;
 	char temp_string[500];
 	char tooltip_string[200];
 
 	struct _Guarkplaylist {	//Playlist array
 			char track[500];				// Path to track
-			char short_track[500];	//Short track name (without / in path)
+			//gchar *artist;
+			//gchar *title;
+			//char short_track[500];	//Short track name (without / in path)
 	} *Guark_playlist;
 
 	typedef struct _Guarkdata {
@@ -56,6 +59,8 @@
 		GstStateChangeReturn state;	// Current state of tracker (GstStateChangeReturn)
 		char playsource[500];				// Current song
 		int playlistpos;						// Current position in playlist
+		gchar *artist;
+		gchar *title;
 		int inplaylist;							// Кол-во треков в плейлисте
 		int tracktype;							// Type of track (GuarkDecoderType)
 		gint64 duration;						// Duration of the song
