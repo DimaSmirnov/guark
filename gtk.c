@@ -11,26 +11,12 @@ void Playeron_Pause() { // Pause button event
 }
 
 gboolean ActionTrayIcon_OnScroll (GtkWidget *widget, GdkEventScroll *event, gpointer user_data) { // mouse scroll on tray icon
-	double vol;
-	GstElement *volume;
 
-	volume = gst_bin_get_by_name(GST_BIN(Guark_data.pipeline), "volume");
-	g_object_get (G_OBJECT(volume), "volume", &vol, NULL);
-
-	if (event->direction == GDK_SCROLL_UP) { // Volume UP
-		if (vol<1.4) {
-			vol = vol+0.1;
-			g_object_set (G_OBJECT(volume), "volume", vol, NULL);
-		}
-		sprintf(tooltip_string, "Volume up to: %f", vol);
-		gtk_status_icon_set_tooltip(tray_icon, tooltip_string); //Update title status
+	if (event->direction == GDK_SCROLL_UP) { // scroll UP
+		gst_element_seek_simple(Guark_data.pipeline, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH, Guark_data.current_pos + 1e10);
 	}
-	else if (event->direction == GDK_SCROLL_DOWN) { // Volume down
-			vol = vol-0.1;
-			if (vol<=0) g_object_set (G_OBJECT(volume), "volume", 0);
-			else g_object_set (G_OBJECT(volume), "volume", vol, NULL);
-			sprintf(tooltip_string, "Volume down to: %f", vol);
-			gtk_status_icon_set_tooltip(tray_icon, tooltip_string); //Update title status
+	else if (event->direction == GDK_SCROLL_DOWN) { // scroll down
+		gst_element_seek_simple(Guark_data.pipeline, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH, Guark_data.current_pos - 1e10);
 	}
 	else if (event->direction == GDK_SCROLL_RIGHT) { // Next track in playlist
 		printf("Next track in playlist\n");
@@ -38,8 +24,6 @@ gboolean ActionTrayIcon_OnScroll (GtkWidget *widget, GdkEventScroll *event, gpoi
 	else if (event->direction == GDK_SCROLL_LEFT) { // Prev. track in playlist
 		printf("Previously track in playlist\n");
 	}
-
-	gst_object_unref(volume);
 }
 
 void Playeron_Quit() {
