@@ -83,11 +83,11 @@ static gboolean bus_call (GstBus *bus, GstMessage *msg, gpointer data) {
 GstElement * Sound_init(char *filename) {
 
 
-	gst_element_set_state (Guark_data.pipeline, GST_STATE_NULL);
-	playbin  = gst_element_factory_make ("playbin2", "play");
+	if (Guark_data.pipeline) gst_element_set_state (Guark_data.pipeline, GST_STATE_NULL);
+	Guark_data.pipeline  = gst_element_factory_make ("playbin2", "play");
 	//volume = gst_element_factory_make("volume", "volume");
 	//sink = gst_element_factory_make("audio-sink", "sink");
-  bus = gst_pipeline_get_bus (GST_PIPELINE (playbin));
+  bus = gst_pipeline_get_bus (GST_PIPELINE (Guark_data.pipeline));
 
   //gst_bin_add_many (GST_BIN(bus), volume, sink); // ???
 	//gst_element_link_many (playbin, volume, sink, NULL); // ???
@@ -95,8 +95,9 @@ GstElement * Sound_init(char *filename) {
   gst_bus_add_watch (bus, bus_call, loop);
   gst_object_unref (bus);
 	g_object_set (G_OBJECT (Guark_data.pipeline), "uri", gst_filename_to_uri(filename, &error), NULL);
-	return playbin;
+	return Guark_data.pipeline;
 }
+
 GuarkState Sound_Deinit() {
 
 	gst_element_set_state (Guark_data.pipeline, GST_STATE_NULL);
@@ -108,7 +109,7 @@ GuarkState Sound_Deinit() {
 }
 GuarkState Sound_Play() {
 
-	strcpy(Guark_data.playsource,Guark_playlist[Guark_data.playlistpos].track); // Get track from playlist
+	//strcpy(Guark_data.playsource,Guark_playlist[Guark_data.playlistpos].track); // Get track from playlist
 	Guark_data.state = gst_element_set_state (Guark_data.pipeline, GST_STATE_PLAYING);   // Start track
 	if (Guark_data.state == GST_STATE_CHANGE_FAILURE) {
 		GstMessage *msg;
