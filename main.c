@@ -7,7 +7,9 @@
 #include <gst/gst.h>
 #include <gdk/gdk.h>
 
+
 #include "variables.h"
+#include "notify.c"
 #include "gst.c"
 #include "gtk.c"
 #include "playlist.c"
@@ -25,7 +27,7 @@ int main (int argc, char *argv[]) {
 	gst_init (&argc, &argv);
 	remove("/tmp/guark.status");
 	loop = g_main_loop_new (NULL, FALSE);
-	tray_icon = Guark_Init(argc, &argv[0]);
+	if (!(tray_icon = Guark_Init(argc, &argv[0]))) return 0;
 	Guark_data.playlistpos = Guark_data.inplaylist-1; // Start last track
 
 	if (argv[1]) {

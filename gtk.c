@@ -9,7 +9,6 @@ void Playeron_Pause() { // Pause button event
 		printf("Paused\n");
 		}
 }
-
 gboolean ActionTrayIcon_OnScroll (GtkWidget *widget, GdkEventScroll *event, gpointer user_data) { // mouse scroll on tray icon
 
 	if (event->direction == GDK_SCROLL_UP) { // scroll UP
@@ -25,7 +24,6 @@ gboolean ActionTrayIcon_OnScroll (GtkWidget *widget, GdkEventScroll *event, gpoi
 		printf("Previously track in playlist\n");
 	}
 }
-
 void Playeron_Quit() {
 	printf("Bye-bye\n");
 	gtk_main_quit ();
@@ -42,7 +40,6 @@ GuarkState Playeron_Stop() {
 	Guark_data.state=2;
 	printf("Stop playing\n");
 }
-
 GuarkState Createmenu() {
 
 	menu = gtk_menu_new();
@@ -113,7 +110,10 @@ static GtkStatusIcon *Guark_Init(int argc, char *argv[]) {
 	Guark_playlist = calloc(1, sizeof(struct _Guarkplaylist));
 	Guark_data.inplaylist = Guarkplaylist_Read();
 	if (!argv[1] && !Guark_data.inplaylist) {
-		printf("Playlist is empty. For start please add path to track as argument\n");
+		strcpy(guark_notify,"Playlist is empty");
+		strcpy(guark_notify_header,"Guark notification");
+		printf("%s\n",guark_notify);
+		Create_notify(guark_notify, guark_notify_header);
 		return 0;
 	}
 	Guark_data.artist = "Artist";

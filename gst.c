@@ -87,7 +87,7 @@ GstElement * Sound_init(char *filename) {
 	tags = gst_tag_list_new();
 	if (strstr(filename,"http://")) {
 		sprintf(temp_string,"playbin2 uri=%s",filename);
-		//printf("pipe: %s\n",temp_string);
+		printf("pipe: %s\n",temp_string);
 		Guark_data.pipeline = gst_parse_launch (temp_string, NULL);
 	}
 	else {

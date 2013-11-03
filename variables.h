@@ -46,7 +46,9 @@
 	FILE *pFile,*pFile1;
 	char temp_string[500];
 	char tooltip_string[200];
-
+	char guark_notify[200];
+	char guark_notify_header[100];
+	
 	struct _Guarkplaylist {	//Playlist array
 			char track[500];				// Path to track
 			//gchar *artist;
