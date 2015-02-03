@@ -113,7 +113,7 @@ static GtkStatusIcon *Guark_Init(int argc, char *argv[]) {
 		strcpy(guark_notify,"Playlist is empty");
 		strcpy(guark_notify_header,"Guark notification");
 		printf("%s\n",guark_notify);
-		Create_notify(guark_notify, guark_notify_header);
+		Create_notify(guark_notify, guark_notify_header,0);
 		return 0;
 	}
 	Guark_data.artist = "Artist";

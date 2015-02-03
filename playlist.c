@@ -1,4 +1,3 @@
-
 int Guarkplaylist_PlayNext() {
 
 	if (Guark_data.playlistpos < Guark_data.inplaylist-1) Guark_data.playlistpos++;
@@ -9,7 +8,6 @@ int Guarkplaylist_PlayNext() {
 	Guarkplaylist_Show();
 	return Guark_data.playlistpos;
 }
-
 int Guarkplaylist_PlayPrev() {
 	if (Guark_data.playlistpos > 0)Guark_data.playlistpos--;
 	else Guark_data.playlistpos=Guark_data.inplaylist-1;
@@ -18,21 +16,59 @@ int Guarkplaylist_PlayPrev() {
 	Guarkplaylist_Show();
 	return Guark_data.playlistpos;
 }
-
 int Guarkplaylist_addInto(char* trackpath) {
 	if (!strstr(trackpath,".mp3") &&
 	!strstr(trackpath,".ogg") &&
+	!strstr(trackpath,".pls") &&
 	!strstr(trackpath,"http://")) return 1; // Если подсунули неверный файл, то выходим с единицей
-
-	pFile1=fopen("/tmp/guark.playlist","a");
-	if (pFile1) {
-		sprintf(temp_string,"%s\n",trackpath);
-		fputs (temp_string,pFile1);
-		fclose(pFile1);
-		pFile=fopen("/tmp/guark.status","a");
-		fclose(pFile);
+	
+	if (strstr(trackpath,".pls")) return Guarkplaylist_Parser(trackpath);
+	else {
+		pFile1=fopen("/tmp/guark.playlist","a");
+		if (pFile1) {
+			sprintf(temp_string,"%s\n",trackpath);
+			fputs (temp_string,pFile1);
+			fclose(pFile1);
+			pFile=fopen("/tmp/guark.status","a");
+			fclose(pFile);
+		}
 	}
 	return 0;
+}
+int Guarkplaylist_Parser(char *plspath) {
+	int qtyentries=0;
+	int cntr=1;
+	
+	pFile1=fopen(plspath,"r");
+	while (fgets(temp_string,100,pFile1)) {
+		if (strstr(temp_string,"NumberOfEntries")) {
+			result=strtok(temp_string,"=");
+			result=strtok(NULL,"\n");
+			qtyentries=atoi(result);
+		}
+	}
+	rewind(pFile1);
+	while (fgets(temp_string,100,pFile1)) {
+		sprintf(temp,"File%d=",cntr);
+		if (strstr(temp_string,temp)) {
+			result=strtok(temp_string,"=");
+			result=strtok(NULL,"\n");
+			printf("Add to playlist: %s\n",result);
+			
+			pFile=fopen("/tmp/guark.playlist","a");
+			if (pFile) {
+				sprintf(temp_string,"%s\n",result);
+				fputs (temp_string,pFile);
+				fclose(pFile);
+				pFile=fopen("/tmp/guark.status","a");
+				fclose(pFile);
+			}
+			cntr++;
+		}
+	}
+	
+	if (!qtyentries) return 1;
+	else return 0;
 }
 void Guarkplaylist_Clear() {
 
@@ -78,7 +114,6 @@ int Guarkplaylist_Read() {
 
 	return Guark_data.inplaylist;
 }
-
 int Guarkplaylist_Trackselect(GtkMenuItem *widget, gpointer user_data) {
 
 	strcpy(Guark_data.playsource,gtk_menu_item_get_label(widget));

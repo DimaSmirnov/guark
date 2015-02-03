@@ -25,12 +25,14 @@
 	int Guarkplaylist_CheckUpdateStatus();
 	int Guarkplaylist_PlayPrev();
 	int Guarkplaylist_PlayNext();
-
-  GstElement *sink, *volume;
-  GstBus *bus;
-  GstTagList *tags;
+	int Guarkplaylist_addInto(char*);
+	int Guarkplaylist_Parser(char *);
+	
+	GstElement *sink, *volume;
+	GstBus *bus;
+	GstTagList *tags;
 	GError *error = NULL;
-  guint watch_id;
+	guint watch_id;
 	GstElement *playbin;
 	GMainLoop *loop;
 
@@ -44,10 +46,13 @@
 
 
 	FILE *pFile,*pFile1;
+	char *result;
+	char temp[500];
 	char temp_string[500];
 	char tooltip_string[200];
 	char guark_notify[200];
 	char guark_notify_header[100];
+	//int tmpdigit;
 	
 	struct _Guarkplaylist {	//Playlist array
 			char track[500];				// Path to track

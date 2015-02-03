@@ -32,7 +32,7 @@ int main (int argc, char *argv[]) {
 
 	if (argv[1]) {
 		i = Guarkplaylist_addInto(argv[1]);
-		if (i) return 0;
+		if (i) { printf("Выбран неверный файл для воспроизведения\n"); return 0; }
 	}
 	else {
 		Guark_data.pipeline = Sound_init(Guark_playlist[Guark_data.playlistpos].track);
