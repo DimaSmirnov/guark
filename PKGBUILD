@@ -2,7 +2,7 @@
 pkgname=guark
 _gitname=guark
 
-pkgver=1.0.0
+pkgver=0.0.2
 pkgrel=2
 
 pkgdesc="Tray audio player. Written on C with GTK and powered by GStreamer"
